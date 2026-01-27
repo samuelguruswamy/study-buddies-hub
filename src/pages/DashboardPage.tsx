@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { 
   Trophy, 
   Flame, 
@@ -16,9 +17,23 @@ import {
   Award,
   Code,
   Database,
-  Globe
+  Globe,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 }
+  }
+};
 
 const user = {
   name: "Jordan",
@@ -126,116 +141,133 @@ export function DashboardPage() {
     <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4">
         {/* Welcome Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-2">
+        <motion.div 
+          className="mb-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
+            <Flame className="w-4 h-4" />
+            {user.streak}-day streak!
+          </span>
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-3">
             Welcome back, {user.name}! 👋
           </h1>
-          <p className="text-muted-foreground">
-            You're on a {user.streak}-day streak! Keep up the amazing work.
+          <p className="text-lg text-muted-foreground">
+            Keep up the amazing work. You're making great progress!
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 rounded-2xl bg-card border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Trophy className="w-4 h-4 text-primary" />
+            <motion.div 
+              className="grid grid-cols-2 md:grid-cols-4 gap-4"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+            >
+              {[
+                { icon: Trophy, value: `Level ${user.level}`, label: "Current Level", color: "from-primary to-primary/70" },
+                { icon: Flame, value: `${user.streak} days`, label: "Current Streak", color: "from-accent to-accent/70" },
+                { icon: CheckCircle2, value: user.completedLessons, label: "Lessons Done", color: "from-success to-success/70" },
+                { icon: Clock, value: `${user.hoursLearned}h`, label: "Hours Learned", color: "from-warning to-warning/70" },
+              ].map((stat, index) => (
+                <motion.div 
+                  key={stat.label}
+                  variants={fadeInUp}
+                  className="p-5 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-3`}>
+                    <stat.icon className="w-5 h-5 text-primary-foreground" />
                   </div>
-                </div>
-                <div className="text-2xl font-display font-bold text-foreground">Level {user.level}</div>
-                <div className="text-sm text-muted-foreground">Current Level</div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-card border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <Flame className="w-4 h-4 text-accent" />
-                  </div>
-                </div>
-                <div className="text-2xl font-display font-bold text-foreground">{user.streak} days</div>
-                <div className="text-sm text-muted-foreground">Current Streak</div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-card border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 text-success" />
-                  </div>
-                </div>
-                <div className="text-2xl font-display font-bold text-foreground">{user.completedLessons}</div>
-                <div className="text-sm text-muted-foreground">Lessons Done</div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-card border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center">
-                    <Clock className="w-4 h-4 text-warning" />
-                  </div>
-                </div>
-                <div className="text-2xl font-display font-bold text-foreground">{user.hoursLearned}h</div>
-                <div className="text-sm text-muted-foreground">Hours Learned</div>
-              </div>
-            </div>
+                  <div className="text-2xl font-display font-bold text-foreground">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
+                </motion.div>
+              ))}
+            </motion.div>
 
             {/* XP Progress */}
-            <div className="p-6 rounded-2xl bg-card border border-border">
+            <motion.div 
+              className="p-6 rounded-3xl bg-card border border-border shadow-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-                    <Zap className="w-5 h-5 text-primary-foreground" />
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
+                    <Zap className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-display font-semibold text-foreground">Level Progress</h3>
+                    <h3 className="font-display font-semibold text-foreground text-lg">Level Progress</h3>
                     <p className="text-sm text-muted-foreground">
                       {user.xpToNext - user.xp} XP to Level {user.level + 1}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-2xl font-display font-bold text-primary">{user.xp}</span>
+                  <span className="text-3xl font-display font-bold text-primary">{user.xp}</span>
                   <span className="text-muted-foreground"> / {user.xpToNext} XP</span>
                 </div>
               </div>
-              <div className="h-3 bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full gradient-primary rounded-full transition-all duration-500"
-                  style={{ width: `${progressPercentage}%` }}
+              <div className="h-4 bg-secondary rounded-full overflow-hidden">
+                <motion.div 
+                  className="h-full gradient-primary rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercentage}%` }}
+                  transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
                 />
               </div>
-            </div>
+            </motion.div>
 
             {/* Weekly Activity Chart */}
-            <div className="p-6 rounded-2xl bg-card border border-border">
+            <motion.div 
+              className="p-6 rounded-3xl bg-card border border-border shadow-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-display font-semibold text-foreground">Weekly Activity</h3>
+                <h3 className="font-display font-semibold text-foreground text-lg">Weekly Activity</h3>
                 <div className="flex items-center gap-4 text-sm">
                   <span className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-primary"></span>
+                    <span className="w-3 h-3 rounded-full gradient-primary"></span>
                     Hours
                   </span>
                 </div>
               </div>
-              <div className="flex items-end justify-between gap-2 h-32">
+              <div className="flex items-end justify-between gap-3 h-36">
                 {weeklyProgress.map((day, index) => (
-                  <div key={day.day} className="flex-1 flex flex-col items-center gap-2">
+                  <motion.div 
+                    key={day.day} 
+                    className="flex-1 flex flex-col items-center gap-2"
+                    initial={{ scaleY: 0 }}
+                    animate={{ scaleY: 1 }}
+                    transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                    style={{ transformOrigin: "bottom" }}
+                  >
                     <div 
-                      className="w-full rounded-t-lg gradient-primary transition-all hover:opacity-80"
-                      style={{ height: `${(day.hours / maxHours) * 100}%`, minHeight: day.hours > 0 ? '8px' : '0' }}
+                      className="w-full rounded-xl gradient-primary transition-all hover:opacity-80 cursor-pointer"
+                      style={{ height: `${(day.hours / maxHours) * 100}%`, minHeight: day.hours > 0 ? '12px' : '0' }}
                     />
-                    <span className="text-xs text-muted-foreground">{day.day}</span>
-                  </div>
+                    <span className="text-xs text-muted-foreground font-medium">{day.day}</span>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Recommended Resources */}
-            <div className="p-6 rounded-2xl bg-card border border-border">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-semibold text-foreground">Continue Learning</h3>
+            <motion.div 
+              className="p-6 rounded-3xl bg-card border border-border shadow-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-display font-semibold text-foreground text-lg">Continue Learning</h3>
                 <Button asChild variant="ghost" size="sm">
                   <Link to="/resources">
                     View All
@@ -244,13 +276,14 @@ export function DashboardPage() {
                 </Button>
               </div>
               <div className="space-y-3">
-                {recommendedResources.map((resource) => (
-                  <div 
+                {recommendedResources.map((resource, index) => (
+                  <motion.div 
                     key={resource.title}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer group"
+                    whileHover={{ x: 4 }}
                   >
-                    <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center shrink-0">
-                      <resource.icon className="w-5 h-5 text-primary-foreground" />
+                    <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shrink-0 group-hover:shadow-glow transition-shadow">
+                      <resource.icon className="w-6 h-6 text-primary-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-foreground truncate">{resource.title}</h4>
@@ -261,14 +294,14 @@ export function DashboardPage() {
                       </div>
                     </div>
                     {resource.progress > 0 ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-1.5 bg-secondary rounded-full overflow-hidden">
+                      <div className="flex items-center gap-3">
+                        <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-success rounded-full"
                             style={{ width: `${resource.progress}%` }}
                           />
                         </div>
-                        <span className="text-xs text-muted-foreground">{resource.progress}%</span>
+                        <span className="text-sm font-medium text-success">{resource.progress}%</span>
                       </div>
                     ) : (
                       <Button size="sm" variant="secondary">
@@ -276,16 +309,21 @@ export function DashboardPage() {
                         Start
                       </Button>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <motion.div 
+            className="space-y-6"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             {/* Upcoming Sessions */}
-            <div className="p-6 rounded-2xl bg-card border border-border">
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-semibold text-foreground">Upcoming Sessions</h3>
                 <Button asChild variant="ghost" size="sm">
@@ -298,11 +336,11 @@ export function DashboardPage() {
                 {upcomingSessions.map((session) => (
                   <div 
                     key={session.title}
-                    className="p-4 rounded-xl bg-secondary/50"
+                    className="p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <session.icon className="w-4 h-4 text-primary" />
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <session.icon className="w-5 h-5 text-primary" />
                       </div>
                       <div className="min-w-0">
                         <h4 className="font-medium text-foreground text-sm">{session.title}</h4>
@@ -319,27 +357,27 @@ export function DashboardPage() {
             </div>
 
             {/* Recent Activity */}
-            <div className="p-6 rounded-2xl bg-card border border-border">
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-sm">
               <h3 className="font-display font-semibold text-foreground mb-4">Recent Activity</h3>
               <div className="space-y-4">
                 {recentActivities.map((activity, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <div className={cn(
-                      "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+                      "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
                       activity.type === 'lesson' ? 'bg-success/10' :
                       activity.type === 'quiz' ? 'bg-warning/10' : 'bg-primary/10'
                     )}>
                       <activity.icon className={cn(
-                        "w-4 h-4",
+                        "w-5 h-5",
                         activity.type === 'lesson' ? 'text-success' :
                         activity.type === 'quiz' ? 'text-warning' : 'text-primary'
                       )} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-foreground">{activity.title}</p>
+                      <p className="text-sm text-foreground font-medium">{activity.title}</p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>{activity.time}</span>
-                        <span className="text-success">+{activity.xp} XP</span>
+                        <span className="text-success font-medium">+{activity.xp} XP</span>
                       </div>
                     </div>
                   </div>
@@ -348,40 +386,41 @@ export function DashboardPage() {
             </div>
 
             {/* Badges */}
-            <div className="p-6 rounded-2xl bg-card border border-border">
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-semibold text-foreground">Badges</h3>
-                <span className="text-sm text-muted-foreground">{badges.filter(b => b.earned).length}/{badges.length}</span>
+                <span className="text-sm text-muted-foreground font-medium">{badges.filter(b => b.earned).length}/{badges.length}</span>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {badges.map((badge) => (
-                  <div 
+                  <motion.div 
                     key={badge.name}
+                    whileHover={{ scale: badge.earned ? 1.1 : 1 }}
                     className={cn(
-                      "aspect-square rounded-xl flex flex-col items-center justify-center p-2 transition-all",
+                      "aspect-square rounded-2xl flex flex-col items-center justify-center p-2 transition-all cursor-pointer",
                       badge.earned 
-                        ? "bg-primary/10 hover:bg-primary/20" 
+                        ? "bg-primary/10 hover:bg-primary/20 hover:shadow-md" 
                         : "bg-secondary/50 opacity-50"
                     )}
                   >
                     <span className="text-2xl mb-1">{badge.icon}</span>
-                    <span className="text-[10px] text-center text-muted-foreground leading-tight">
+                    <span className="text-[10px] text-center text-muted-foreground leading-tight font-medium">
                       {badge.name}
                     </span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
 
             {/* Motivation Card */}
-            <div className="p-6 rounded-2xl gradient-accent text-accent-foreground">
-              <div className="text-3xl mb-3">💪</div>
-              <h3 className="font-display font-semibold mb-2">Keep Going!</h3>
+            <div className="p-6 rounded-3xl gradient-accent text-accent-foreground shadow-accent-glow">
+              <div className="text-4xl mb-3">💪</div>
+              <h3 className="font-display font-semibold text-lg mb-2">Keep Going!</h3>
               <p className="text-sm text-accent-foreground/80">
                 You're in the top 15% of learners this week. Just 2 more lessons to level up!
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
