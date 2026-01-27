@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import { 
   Calendar as CalendarIcon, 
   Clock, 
@@ -12,9 +13,23 @@ import {
   Database,
   Globe,
   Zap,
-  Filter
+  Filter,
+  Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 }
+  }
+};
 
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const currentMonth = "January 2024";
@@ -131,27 +146,41 @@ export function SchedulePage() {
     <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-2">
+        <motion.div 
+          className="mb-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+            <Sparkles className="w-4 h-4" />
+            Live Learning
+          </span>
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-3">
             Study Sessions
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-lg text-muted-foreground max-w-2xl">
             Join live tutoring sessions, study groups, and workshops with fellow students.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
+          <motion.div 
+            className="lg:col-span-1 space-y-6"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             {/* Calendar */}
-            <div className="p-6 rounded-2xl bg-card border border-border">
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-semibold text-foreground">{currentMonth}</h3>
                 <div className="flex items-center gap-1">
-                  <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
+                  <button className="p-2 rounded-lg hover:bg-secondary transition-colors">
                     <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                   </button>
-                  <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
+                  <button className="p-2 rounded-lg hover:bg-secondary transition-colors">
                     <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
@@ -159,7 +188,7 @@ export function SchedulePage() {
 
               <div className="grid grid-cols-7 gap-1 mb-2">
                 {days.map((day) => (
-                  <div key={day} className="text-center text-xs text-muted-foreground py-2">
+                  <div key={day} className="text-center text-xs text-muted-foreground py-2 font-medium">
                     {day}
                   </div>
                 ))}
@@ -167,13 +196,15 @@ export function SchedulePage() {
 
               <div className="grid grid-cols-7 gap-1">
                 {calendarDays.map(({ day, hasSession, count }) => (
-                  <button
+                  <motion.button
                     key={day}
                     onClick={() => setSelectedDate(selectedDate === day ? null : day)}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
                     className={cn(
-                      "relative aspect-square rounded-lg flex flex-col items-center justify-center text-sm transition-all",
+                      "relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all",
                       selectedDate === day 
-                        ? "bg-primary text-primary-foreground" 
+                        ? "bg-primary text-primary-foreground shadow-glow" 
                         : hasSession 
                           ? "bg-primary/10 text-primary hover:bg-primary/20"
                           : "hover:bg-secondary text-foreground"
@@ -182,18 +213,18 @@ export function SchedulePage() {
                     {day}
                     {hasSession && count && (
                       <span className={cn(
-                        "absolute bottom-1 w-1.5 h-1.5 rounded-full",
+                        "absolute bottom-1.5 w-1.5 h-1.5 rounded-full",
                         selectedDate === day ? "bg-primary-foreground" : "bg-primary"
                       )} />
                     )}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
 
               {selectedDate && (
                 <button 
                   onClick={() => setSelectedDate(null)}
-                  className="w-full mt-4 text-sm text-primary hover:underline"
+                  className="w-full mt-4 text-sm text-primary hover:underline font-medium"
                 >
                   Show all dates
                 </button>
@@ -201,16 +232,18 @@ export function SchedulePage() {
             </div>
 
             {/* Filter by Type */}
-            <div className="p-6 rounded-2xl bg-card border border-border">
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <Filter className="w-4 h-4 text-muted-foreground" />
                 <h3 className="font-display font-semibold text-foreground">Session Type</h3>
               </div>
               <div className="space-y-2">
                 {sessionTypes.map((type) => (
-                  <button
+                  <motion.button
                     key={type.id}
                     onClick={() => setSelectedType(type.id)}
+                    whileHover={{ x: 4 }}
+                    whileTap={{ scale: 0.98 }}
                     className={cn(
                       "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
                       selectedType === type.id
@@ -220,74 +253,85 @@ export function SchedulePage() {
                   >
                     <type.icon className="w-4 h-4" />
                     {type.label}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
 
             {/* Quick Stats */}
-            <div className="p-6 rounded-2xl gradient-primary text-primary-foreground">
+            <div className="p-6 rounded-3xl gradient-primary text-primary-foreground shadow-glow">
               <h3 className="font-display font-semibold mb-4">This Week</h3>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-primary-foreground/80">Total Sessions</span>
-                  <span className="font-semibold">24</span>
+                  <span className="text-2xl font-display font-bold">24</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-primary-foreground/80">Available Spots</span>
-                  <span className="font-semibold">156</span>
+                  <span className="text-2xl font-display font-bold">156</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-primary-foreground/80">Peer Tutors</span>
-                  <span className="font-semibold">18</span>
+                  <span className="text-2xl font-display font-bold">18</span>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Sessions List */}
           <div className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display font-semibold text-foreground">
+            <motion.div 
+              className="flex items-center justify-between mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h2 className="font-display font-semibold text-xl text-foreground">
                 {selectedDate ? `January ${selectedDate}` : "All Upcoming"} Sessions
               </h2>
-              <span className="text-sm text-muted-foreground">
-                {filteredSessions.length} session{filteredSessions.length !== 1 ? 's' : ''} found
+              <span className="text-sm text-muted-foreground px-3 py-1 rounded-full bg-secondary">
+                {filteredSessions.length} session{filteredSessions.length !== 1 ? 's' : ''}
               </span>
-            </div>
+            </motion.div>
 
-            <div className="space-y-4">
+            <motion.div 
+              className="space-y-4"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+            >
               {filteredSessions.map((session) => (
-                <div 
+                <motion.div 
                   key={session.id}
-                  className="p-6 rounded-2xl bg-card border border-border card-hover"
+                  variants={fadeInUp}
+                  className="p-6 rounded-3xl bg-card border border-border hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 >
                   <div className="flex flex-col md:flex-row md:items-start gap-4">
                     {/* Icon */}
-                    <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shrink-0">
-                      <session.icon className="w-6 h-6 text-primary-foreground" />
+                    <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shrink-0 shadow-glow">
+                      <session.icon className="w-7 h-7 text-primary-foreground" />
                     </div>
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span className={cn(
-                          "px-2.5 py-0.5 rounded-full text-xs font-medium",
+                          "px-3 py-1 rounded-full text-xs font-semibold",
                           session.level === 'Beginner' ? 'bg-success/10 text-success' :
                           session.level === 'Intermediate' ? 'bg-warning/10 text-warning' :
                           'bg-accent/10 text-accent'
                         )}>
                           {session.level}
                         </span>
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground capitalize">
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground capitalize">
                           {session.type}
                         </span>
                       </div>
 
-                      <h3 className="text-lg font-semibold text-foreground mb-1">
+                      <h3 className="text-xl font-semibold text-foreground mb-2">
                         {session.title}
                       </h3>
-                      <p className="text-sm text-muted-foreground mb-3">
+                      <p className="text-muted-foreground mb-4">
                         {session.description}
                       </p>
 
@@ -309,7 +353,7 @@ export function SchedulePage() {
 
                     {/* Action */}
                     <div className="flex flex-col items-end gap-2 shrink-0">
-                      <Button variant="default">
+                      <Button variant="default" className="shadow-md">
                         Join Session
                       </Button>
                       <span className="text-xs text-muted-foreground">
@@ -317,22 +361,28 @@ export function SchedulePage() {
                       </span>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
 
               {filteredSessions.length === 0 && (
-                <div className="text-center py-12">
-                  <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <motion.div 
+                  className="text-center py-16"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-4">
+                    <CalendarIcon className="w-8 h-8 text-muted-foreground" />
+                  </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">No sessions found</h3>
-                  <p className="text-muted-foreground mb-4">
+                  <p className="text-muted-foreground mb-6">
                     Try adjusting your filters or selecting a different date.
                   </p>
                   <Button variant="outline" onClick={() => { setSelectedType("all"); setSelectedDate(null); }}>
                     Clear Filters
                   </Button>
-                </div>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
