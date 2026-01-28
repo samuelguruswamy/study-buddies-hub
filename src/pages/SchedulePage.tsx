@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { 
   Calendar as CalendarIcon, 
@@ -135,6 +137,16 @@ const calendarDays = [
 export function SchedulePage() {
   const [selectedType, setSelectedType] = useState("all");
   const [selectedDate, setSelectedDate] = useState<number | null>(15);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleJoinSession = (session: typeof sessions[0]) => {
+    toast({
+      title: "Session Joined! 🎉",
+      description: `You've registered for "${session.title}" with ${session.tutor}. See you at ${session.time}!`,
+    });
+    navigate("/dashboard");
+  };
 
   const filteredSessions = sessions.filter(session => {
     const matchesType = selectedType === "all" || session.type === selectedType;
@@ -353,7 +365,12 @@ export function SchedulePage() {
 
                     {/* Action */}
                     <div className="flex flex-col items-end gap-2 shrink-0">
-                      <Button variant="default" className="shadow-md">
+                      <Button 
+                        variant="default" 
+                        className="shadow-md"
+                        onClick={() => handleJoinSession(session)}
+                        aria-label={`Join ${session.title} session`}
+                      >
                         Join Session
                       </Button>
                       <span className="text-xs text-muted-foreground">

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { 
   Trophy, 
@@ -136,6 +137,23 @@ const maxHours = Math.max(...weeklyProgress.map(d => d.hours));
 
 export function DashboardPage() {
   const progressPercentage = (user.xp / user.xpToNext) * 100;
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleStartResource = (title: string) => {
+    toast({
+      title: "Loading Resource... 📚",
+      description: `Starting "${title}". Let's learn!`,
+    });
+  };
+
+  const handleJoinSession = (session: typeof upcomingSessions[0]) => {
+    toast({
+      title: "Joining Session! 🎉",
+      description: `Connecting to "${session.title}" with ${session.tutor}.`,
+    });
+    navigate("/schedule");
+  };
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -304,7 +322,12 @@ export function DashboardPage() {
                         <span className="text-sm font-medium text-success">{resource.progress}%</span>
                       </div>
                     ) : (
-                      <Button size="sm" variant="secondary">
+                      <Button 
+                        size="sm" 
+                        variant="secondary"
+                        onClick={() => handleStartResource(resource.title)}
+                        aria-label={`Start ${resource.title}`}
+                      >
                         <Play className="w-3 h-3" />
                         Start
                       </Button>
@@ -334,9 +357,11 @@ export function DashboardPage() {
               </div>
               <div className="space-y-3">
                 {upcomingSessions.map((session) => (
-                  <div 
+                  <button 
                     key={session.title}
-                    className="p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors"
+                    className="w-full p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors text-left"
+                    onClick={() => handleJoinSession(session)}
+                    aria-label={`Join ${session.title} session`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -348,7 +373,7 @@ export function DashboardPage() {
                         <span className="text-xs font-medium text-primary">{session.time}</span>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
               <Button asChild className="w-full mt-4" variant="outline">

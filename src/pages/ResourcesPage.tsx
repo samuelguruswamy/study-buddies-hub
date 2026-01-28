@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { 
   BookOpen, 
@@ -165,6 +166,14 @@ export function ResourcesPage() {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const { toast } = useToast();
+
+  const handleStartResource = (resource: typeof resources[0]) => {
+    toast({
+      title: resource.completedLessons > 0 ? "Resuming... ▶️" : "Starting... 🚀",
+      description: `Loading "${resource.title}". Get ready to learn!`,
+    });
+  };
 
   const filteredResources = resources.filter(resource => {
     const matchesCategory = selectedCategory === "all" || resource.type === selectedCategory;
@@ -426,7 +435,12 @@ export function ResourcesPage() {
                         </span>
                       )}
                     </div>
-                    <Button size="sm" variant={resource.completedLessons > 0 ? "outline" : "default"}>
+                    <Button 
+                      size="sm" 
+                      variant={resource.completedLessons > 0 ? "outline" : "default"}
+                      onClick={() => handleStartResource(resource)}
+                      aria-label={`${resource.completedLessons > 0 ? 'Continue' : 'Start'} ${resource.title}`}
+                    >
                       {resource.completedLessons > 0 ? 'Continue' : 'Start'}
                       <ChevronRight className="w-4 h-4" />
                     </Button>
