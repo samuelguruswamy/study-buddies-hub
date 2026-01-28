@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Menu, 
@@ -25,6 +26,17 @@ const navItems = [
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleGetStarted = () => {
+    toast({
+      title: "Welcome! 🎉",
+      description: "Let's get you started on your learning journey!",
+    });
+    navigate("/dashboard");
+    setIsOpen(false);
+  };
 
   return (
     <motion.nav 
@@ -82,7 +94,13 @@ export function Navigation() {
 
           {/* CTA Button */}
           <div className="hidden md:block">
-            <Button variant="accent" size="sm" className="shadow-md">
+            <Button 
+              variant="accent" 
+              size="sm" 
+              className="shadow-md"
+              onClick={handleGetStarted}
+              aria-label="Get started with learning"
+            >
               Get Started
             </Button>
           </div>
@@ -161,7 +179,11 @@ export function Navigation() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: navItems.length * 0.05 }}
               >
-                <Button variant="accent" className="w-full mt-2">
+                <Button 
+                  variant="accent" 
+                  className="w-full mt-2"
+                  onClick={handleGetStarted}
+                >
                   Get Started
                 </Button>
               </motion.div>

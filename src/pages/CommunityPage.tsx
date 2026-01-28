@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Users, 
@@ -144,6 +145,44 @@ const achievements = [
 
 export function CommunityPage() {
   const [activeTab, setActiveTab] = useState("discussions");
+  const [postContent, setPostContent] = useState("");
+  const [likedPosts, setLikedPosts] = useState<number[]>([]);
+  const { toast } = useToast();
+
+  const handlePost = () => {
+    if (postContent.trim()) {
+      toast({
+        title: "Posted! 📝",
+        description: "Your question has been shared with the community.",
+      });
+      setPostContent("");
+    } else {
+      toast({
+        title: "Empty Post",
+        description: "Please write something before posting.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLike = (postId: number) => {
+    if (likedPosts.includes(postId)) {
+      setLikedPosts(likedPosts.filter(id => id !== postId));
+    } else {
+      setLikedPosts([...likedPosts, postId]);
+      toast({
+        title: "Liked! ❤️",
+        description: "You liked this post.",
+      });
+    }
+  };
+
+  const handleJoinGroup = (groupName: string) => {
+    toast({
+      title: "Group Joined! 🎉",
+      description: `Welcome to "${groupName}"! Check the schedule for the next session.`,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -221,16 +260,19 @@ export function CommunityPage() {
                       <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold shrink-0">
                         Y
                       </div>
-                      <div className="flex-1">
+                    <div className="flex-1">
                         <textarea
                           placeholder="Ask a question or share something with the community..."
                           className="w-full p-4 rounded-2xl bg-secondary border-0 resize-none focus:ring-2 focus:ring-primary/20 outline-none min-h-[100px] text-foreground"
+                          value={postContent}
+                          onChange={(e) => setPostContent(e.target.value)}
+                          aria-label="Write your post"
                         />
                         <div className="flex items-center justify-between mt-4">
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>Be kind and supportive 💪</span>
                           </div>
-                          <Button className="shadow-md">
+                          <Button className="shadow-md" onClick={handlePost}>
                             <Send className="w-4 h-4" />
                             Post
                           </Button>
@@ -272,17 +314,25 @@ export function CommunityPage() {
 
                             <div className="flex items-center gap-4">
                               <motion.button 
-                                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-accent transition-colors"
+                                className={cn(
+                                  "flex items-center gap-1.5 text-sm transition-colors",
+                                  likedPosts.includes(discussion.id) 
+                                    ? "text-accent" 
+                                    : "text-muted-foreground hover:text-accent"
+                                )}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
+                                onClick={() => handleLike(discussion.id)}
+                                aria-label={likedPosts.includes(discussion.id) ? "Unlike this post" : "Like this post"}
                               >
-                                <Heart className="w-4 h-4" />
-                                {discussion.likes}
+                                <Heart className={cn("w-4 h-4", likedPosts.includes(discussion.id) && "fill-current")} />
+                                {discussion.likes + (likedPosts.includes(discussion.id) ? 1 : 0)}
                               </motion.button>
                               <motion.button 
                                 className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
+                                aria-label={`View ${discussion.replies} replies`}
                               >
                                 <MessageSquare className="w-4 h-4" />
                                 {discussion.replies} replies
@@ -346,7 +396,13 @@ export function CommunityPage() {
                           <span className="text-muted-foreground">Next: </span>
                           <span className="text-primary font-medium">{group.nextSession}</span>
                         </div>
-                        <Button size="sm">Join Group</Button>
+                        <Button 
+                          size="sm"
+                          onClick={() => handleJoinGroup(group.name)}
+                          aria-label={`Join ${group.name} group`}
+                        >
+                          Join Group
+                        </Button>
                       </div>
                     </motion.div>
                   ))}

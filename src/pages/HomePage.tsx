@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowRight, 
   Users, 
@@ -145,6 +146,17 @@ const howItWorks = [
 ];
 
 export function HomePage() {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleJoinSession = (sessionTitle: string) => {
+    toast({
+      title: "Session Joined! 🎉",
+      description: `You've successfully registered for "${sessionTitle}". Check your dashboard for details.`,
+    });
+    navigate("/dashboard");
+  };
+
   return (
     <div className="min-h-screen overflow-hidden">
       {/* Hero Section */}
@@ -457,7 +469,12 @@ export function HomePage() {
                 
                 <div className="flex items-center justify-between pt-4 border-t border-border">
                   <span className="text-sm font-medium text-primary">{session.time}</span>
-                  <Button size="sm" variant="default">
+                  <Button 
+                    size="sm" 
+                    variant="default"
+                    onClick={() => handleJoinSession(session.title)}
+                    aria-label={`Join ${session.title} session`}
+                  >
                     Join Now
                   </Button>
                 </div>
