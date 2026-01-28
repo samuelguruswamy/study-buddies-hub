@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { useAccessibility } from "@/hooks/useAccessibility";
 import {
   Accessibility,
@@ -13,6 +12,8 @@ import {
   RotateCcw,
   Contrast,
   Palette,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 export function AccessibilityPanel() {
@@ -24,10 +25,19 @@ export function AccessibilityPanel() {
     toggleLargeText,
     toggleReducedMotion,
     toggleKeyboardFocus,
+    toggleDarkMode,
     resetSettings,
   } = useAccessibility();
 
   const accessibilityOptions = [
+    {
+      id: "darkMode",
+      label: "Dark Mode",
+      description: "Switch between light and dark themes",
+      icon: settings.darkMode ? Sun : Moon,
+      checked: settings.darkMode,
+      onChange: toggleDarkMode,
+    },
     {
       id: "colorblind",
       label: "Colorblind Friendly",
@@ -146,37 +156,44 @@ export function AccessibilityPanel() {
                 </div>
 
                 {/* Options */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {accessibilityOptions.map((option) => (
-                    <div
+                    <button
                       key={option.id}
-                      className="p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors"
+                      onClick={option.onChange}
+                      className={`w-full p-4 rounded-2xl transition-all text-left ${
+                        option.checked 
+                          ? 'bg-primary/10 border-2 border-primary/30' 
+                          : 'bg-secondary/50 hover:bg-secondary border-2 border-transparent'
+                      }`}
+                      aria-pressed={option.checked}
+                      aria-describedby={`${option.id}-description`}
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center shrink-0">
-                            <option.icon className="w-5 h-5 text-primary" />
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                            option.checked ? 'bg-primary text-primary-foreground' : 'bg-background'
+                          }`}>
+                            <option.icon className="w-5 h-5" />
                           </div>
                           <div>
-                            <label
-                              htmlFor={option.id}
-                              className="font-medium text-foreground cursor-pointer"
-                            >
+                            <span className="font-medium text-foreground block">
                               {option.label}
-                            </label>
-                            <p className="text-sm text-muted-foreground mt-0.5">
+                            </span>
+                            <p id={`${option.id}-description`} className="text-sm text-muted-foreground mt-0.5">
                               {option.description}
                             </p>
                           </div>
                         </div>
-                        <Switch
-                          id={option.id}
-                          checked={option.checked}
-                          onCheckedChange={option.onChange}
-                          aria-describedby={`${option.id}-description`}
-                        />
+                        <div className={`w-12 h-7 rounded-full relative transition-colors ${
+                          option.checked ? 'bg-primary' : 'bg-muted'
+                        }`}>
+                          <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
+                            option.checked ? 'translate-x-6' : 'translate-x-1'
+                          }`} />
+                        </div>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
 

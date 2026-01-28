@@ -6,6 +6,7 @@ interface AccessibilitySettings {
   largeText: boolean;
   reducedMotion: boolean;
   keyboardFocus: boolean;
+  darkMode: boolean;
 }
 
 interface AccessibilityContextType {
@@ -15,6 +16,7 @@ interface AccessibilityContextType {
   toggleLargeText: () => void;
   toggleReducedMotion: () => void;
   toggleKeyboardFocus: () => void;
+  toggleDarkMode: () => void;
   resetSettings: () => void;
 }
 
@@ -24,21 +26,37 @@ const defaultSettings: AccessibilitySettings = {
   largeText: false,
   reducedMotion: false,
   keyboardFocus: true,
+  darkMode: false,
 };
 
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
 
 export function AccessibilityProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<AccessibilitySettings>(() => {
+    if (typeof window === 'undefined') return defaultSettings;
+    
     const saved = localStorage.getItem("accessibility-settings");
-    return saved ? JSON.parse(saved) : defaultSettings;
+    if (saved) {
+      try {
+        return { ...defaultSettings, ...JSON.parse(saved) };
+      } catch {
+        return defaultSettings;
+      }
+    }
+    
+    // Check system preference for dark mode
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    return { ...defaultSettings, darkMode: prefersDark };
   });
 
+  // Apply all settings to document
   useEffect(() => {
     localStorage.setItem("accessibility-settings", JSON.stringify(settings));
     
-    // Apply classes to document
     const root = document.documentElement;
+    
+    // Dark mode
+    root.classList.toggle("dark", settings.darkMode);
     
     // Colorblind mode
     root.classList.toggle("colorblind-mode", settings.colorblindMode);
@@ -56,10 +74,10 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     root.classList.toggle("keyboard-focus", settings.keyboardFocus);
   }, [settings]);
 
-  // Detect system preference for reduced motion
+  // Detect system preference for reduced motion on mount
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mediaQuery.matches && !settings.reducedMotion) {
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motionQuery.matches) {
       setSettings(prev => ({ ...prev, reducedMotion: true }));
     }
   }, []);
@@ -84,6 +102,10 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     setSettings(prev => ({ ...prev, keyboardFocus: !prev.keyboardFocus }));
   };
 
+  const toggleDarkMode = () => {
+    setSettings(prev => ({ ...prev, darkMode: !prev.darkMode }));
+  };
+
   const resetSettings = () => {
     setSettings(defaultSettings);
   };
@@ -97,6 +119,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
         toggleLargeText,
         toggleReducedMotion,
         toggleKeyboardFocus,
+        toggleDarkMode,
         resetSettings,
       }}
     >

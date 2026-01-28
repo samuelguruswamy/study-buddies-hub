@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useAccessibility } from "@/hooks/useAccessibility";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Menu, 
@@ -11,7 +12,9 @@ import {
   LayoutDashboard, 
   BookOpen, 
   Users,
-  Sparkles
+  Sparkles,
+  Sun,
+  Moon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +31,7 @@ export function Navigation() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { settings, toggleDarkMode } = useAccessibility();
 
   const handleGetStarted = () => {
     toast({
@@ -92,8 +96,43 @@ export function Navigation() {
             })}
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden md:block">
+          {/* Right side buttons */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* Dark Mode Toggle */}
+            <motion.button
+              onClick={toggleDarkMode}
+              className="p-2.5 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              aria-label={settings.darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              title={settings.darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              <AnimatePresence mode="wait">
+                {settings.darkMode ? (
+                  <motion.div
+                    key="sun"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Sun className="w-5 h-5 text-warning" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="moon"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Moon className="w-5 h-5 text-muted-foreground" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
+
+            {/* CTA Button */}
             <Button 
               variant="accent" 
               size="sm" 
@@ -106,35 +145,51 @@ export function Navigation() {
           </div>
 
           {/* Mobile Menu Toggle */}
-          <motion.button
-            className="md:hidden p-2 rounded-xl hover:bg-secondary transition-colors"
-            onClick={() => setIsOpen(!isOpen)}
-            whileTap={{ scale: 0.95 }}
-          >
-            <AnimatePresence mode="wait">
-              {isOpen ? (
-                <motion.div
-                  key="close"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <X className="w-6 h-6" />
-                </motion.div>
+          <div className="md:hidden flex items-center gap-2">
+            {/* Mobile Dark Mode Toggle */}
+            <motion.button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors"
+              whileTap={{ scale: 0.95 }}
+              aria-label={settings.darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {settings.darkMode ? (
+                <Sun className="w-5 h-5 text-warning" />
               ) : (
-                <motion.div
-                  key="menu"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Menu className="w-6 h-6" />
-                </motion.div>
+                <Moon className="w-5 h-5 text-muted-foreground" />
               )}
-            </AnimatePresence>
-          </motion.button>
+            </motion.button>
+
+            <motion.button
+              className="p-2 rounded-xl hover:bg-secondary transition-colors"
+              onClick={() => setIsOpen(!isOpen)}
+              whileTap={{ scale: 0.95 }}
+            >
+              <AnimatePresence mode="wait">
+                {isOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <X className="w-6 h-6" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Menu className="w-6 h-6" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </div>
         </div>
       </div>
 
