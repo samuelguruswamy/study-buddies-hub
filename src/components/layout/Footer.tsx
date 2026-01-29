@@ -34,7 +34,7 @@ export function Footer() {
                 <Sparkles className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="font-display font-bold text-lg">
-                Neo<span className="text-primary">2</span>Socratic
+                NeoSocratic
               </span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mb-6">
