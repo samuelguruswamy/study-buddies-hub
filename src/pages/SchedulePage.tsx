@@ -1,21 +1,24 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { 
-  Calendar as CalendarIcon, 
+  Trophy, 
+  Flame, 
+  Target, 
   Clock, 
-  Users, 
-  Video, 
-  ChevronLeft, 
+  BookOpen, 
+  Calendar,
   ChevronRight,
+  Play,
+  CheckCircle2,
+  Star,
+  Zap,
+  TrendingUp,
+  Award,
   Code,
-  Laptop,
   Database,
   Globe,
-  Zap,
-  Filter,
   Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -33,374 +36,416 @@ const staggerContainer = {
   }
 };
 
-const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const currentMonth = "January 2024";
+const user = {
+  name: "Jordan",
+  level: 12,
+  xp: 2450,
+  xpToNext: 3000,
+  streak: 7,
+  badges: 15,
+  completedLessons: 42,
+  hoursLearned: 28,
+};
 
-const sessionTypes = [
-  { id: "all", label: "All Sessions", icon: CalendarIcon },
-  { id: "tutoring", label: "Peer Tutoring", icon: Users },
-  { id: "study", label: "Study Groups", icon: Code },
-  { id: "workshop", label: "Workshops", icon: Laptop },
+const recentActivities = [
+  {
+    type: "lesson",
+    title: "Completed: JavaScript Arrays",
+    time: "2 hours ago",
+    xp: 50,
+    icon: BookOpen,
+  },
+  {
+    type: "quiz",
+    title: "Passed: CSS Flexbox Quiz",
+    time: "Yesterday",
+    xp: 75,
+    score: "8/10",
+    icon: Target,
+  },
+  {
+    type: "session",
+    title: "Joined: Python Study Group",
+    time: "2 days ago",
+    xp: 30,
+    icon: Calendar,
+  },
 ];
 
-const sessions = [
+const upcomingSessions = [
   {
-    id: 1,
-    title: "Python Fundamentals",
-    type: "tutoring",
+    title: "React Hooks Workshop",
     tutor: "Sarah M.",
-    date: "2024-01-15",
-    time: "4:00 PM - 5:00 PM",
-    level: "Beginner",
-    spots: 8,
-    totalSpots: 12,
-    description: "Master Python basics including variables, loops, and functions.",
+    time: "Today, 4:00 PM",
     icon: Code,
   },
   {
-    id: 2,
-    title: "Web Development Study Session",
-    type: "study",
+    title: "Database Design",
     tutor: "Marcus L.",
-    date: "2024-01-15",
-    time: "5:30 PM - 7:00 PM",
-    level: "Intermediate",
-    spots: 5,
-    totalSpots: 8,
-    description: "Collaborative practice building responsive websites with HTML, CSS, and JavaScript.",
-    icon: Globe,
-  },
-  {
-    id: 3,
-    title: "Database Design Workshop",
-    type: "workshop",
-    tutor: "Emily C.",
-    date: "2024-01-16",
-    time: "3:00 PM - 5:00 PM",
-    level: "Intermediate",
-    spots: 15,
-    totalSpots: 20,
-    description: "Learn SQL and database fundamentals in this hands-on workshop.",
+    time: "Tomorrow, 3:00 PM",
     icon: Database,
   },
+];
+
+const recommendedResources = [
   {
-    id: 4,
-    title: "React Basics",
-    type: "tutoring",
-    tutor: "Jordan T.",
-    date: "2024-01-16",
-    time: "6:00 PM - 7:00 PM",
-    level: "Beginner",
-    spots: 6,
-    totalSpots: 10,
-    description: "Introduction to React components, props, and state management.",
-    icon: Laptop,
+    title: "Introduction to APIs",
+    type: "Tutorial",
+    duration: "25 min",
+    difficulty: "Intermediate",
+    icon: Globe,
+    progress: 0,
   },
   {
-    id: 5,
-    title: "Algorithm Problem Solving",
-    type: "study",
-    tutor: "Alex R.",
-    date: "2024-01-17",
-    time: "4:00 PM - 6:00 PM",
-    level: "Advanced",
-    spots: 12,
-    totalSpots: 15,
-    description: "Practice coding challenges and algorithm optimization together.",
-    icon: Zap,
-  },
-  {
-    id: 6,
-    title: "Git & GitHub Essentials",
-    type: "workshop",
-    tutor: "Maya K.",
-    date: "2024-01-18",
-    time: "3:30 PM - 5:00 PM",
-    level: "Beginner",
-    spots: 20,
-    totalSpots: 25,
-    description: "Learn version control fundamentals for collaborative development.",
+    title: "Git Version Control",
+    type: "Video",
+    duration: "18 min",
+    difficulty: "Beginner",
     icon: Code,
+    progress: 60,
+  },
+  {
+    title: "CSS Grid Layout",
+    type: "Practice",
+    duration: "30 min",
+    difficulty: "Intermediate",
+    icon: Globe,
+    progress: 0,
   },
 ];
 
-const calendarDays = [
-  { day: 14, hasSession: false },
-  { day: 15, hasSession: true, count: 2 },
-  { day: 16, hasSession: true, count: 2 },
-  { day: 17, hasSession: true, count: 1 },
-  { day: 18, hasSession: true, count: 1 },
-  { day: 19, hasSession: false },
-  { day: 20, hasSession: false },
+const badges = [
+  { name: "First Lesson", icon: "🎯", earned: true },
+  { name: "Week Streak", icon: "🔥", earned: true },
+  { name: "Quiz Master", icon: "🏆", earned: true },
+  { name: "Helper", icon: "🤝", earned: true },
+  { name: "Night Owl", icon: "🦉", earned: false },
+  { name: "Speed Learner", icon: "⚡", earned: false },
 ];
 
-export function SchedulePage() {
-  const [selectedType, setSelectedType] = useState("all");
-  const [selectedDate, setSelectedDate] = useState<number | null>(15);
+const weeklyProgress = [
+  { day: "Mon", hours: 1.5, lessons: 2 },
+  { day: "Tue", hours: 2, lessons: 3 },
+  { day: "Wed", hours: 1, lessons: 1 },
+  { day: "Thu", hours: 2.5, lessons: 4 },
+  { day: "Fri", hours: 0.5, lessons: 1 },
+  { day: "Sat", hours: 3, lessons: 5 },
+  { day: "Sun", hours: 1.5, lessons: 2 },
+];
+
+const maxHours = Math.max(...weeklyProgress.map(d => d.hours));
+
+export function DashboardPage() {
+  const progressPercentage = (user.xp / user.xpToNext) * 100;
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleJoinSession = (session: typeof sessions[0]) => {
+  const handleStartResource = (title: string) => {
     toast({
-      title: "Session Joined! 🎉",
-      description: `You've registered for "${session.title}" with ${session.tutor}. See you at ${session.time}!`,
+      title: "Loading Resource... 📚",
+      description: `Starting "${title}". Let's learn!`,
     });
-    navigate("/dashboard");
   };
 
-  const filteredSessions = sessions.filter(session => {
-    const matchesType = selectedType === "all" || session.type === selectedType;
-    const matchesDate = selectedDate === null || session.date === `2024-01-${selectedDate}`;
-    return matchesType && matchesDate;
-  });
+  const handleJoinSession = (session: typeof upcomingSessions[0]) => {
+    toast({
+      title: "Joining Session! 🎉",
+      description: `Connecting to "${session.title}" with ${session.tutor}.`,
+    });
+    navigate("/schedule");
+  };
 
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4">
-        {/* Header */}
+        {/* Welcome Header */}
         <motion.div 
           className="mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            <Sparkles className="w-4 h-4" />
-            Live Learning
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 text-accent text-sm font-medium mb-4">
+            <Flame className="w-4 h-4" />
+            {user.streak}-day streak!
           </span>
           <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-3">
-            Study Sessions
+            Welcome back, {user.name}! 👋
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl">
-            Join live tutoring sessions, study groups, and workshops with fellow students.
+          <p className="text-lg text-muted-foreground">
+            Keep up the amazing work. You're making great progress!
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Sidebar */}
-          <motion.div 
-            className="lg:col-span-1 space-y-6"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            {/* Calendar */}
-            <div className="p-6 rounded-3xl bg-card border border-border shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-semibold text-foreground">{currentMonth}</h3>
-                <div className="flex items-center gap-1">
-                  <button className="p-2 rounded-lg hover:bg-secondary transition-colors">
-                    <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                  <button className="p-2 rounded-lg hover:bg-secondary transition-colors">
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {days.map((day) => (
-                  <div key={day} className="text-center text-xs text-muted-foreground py-2 font-medium">
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-7 gap-1">
-                {calendarDays.map(({ day, hasSession, count }) => (
-                  <motion.button
-                    key={day}
-                    onClick={() => setSelectedDate(selectedDate === day ? null : day)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={cn(
-                      "relative aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-medium transition-all",
-                      selectedDate === day 
-                        ? "bg-primary text-primary-foreground shadow-glow" 
-                        : hasSession 
-                          ? "bg-primary/10 text-primary hover:bg-primary/20"
-                          : "hover:bg-secondary text-foreground"
-                    )}
-                  >
-                    {day}
-                    {hasSession && count && (
-                      <span className={cn(
-                        "absolute bottom-1.5 w-1.5 h-1.5 rounded-full",
-                        selectedDate === day ? "bg-primary-foreground" : "bg-primary"
-                      )} />
-                    )}
-                  </motion.button>
-                ))}
-              </div>
-
-              {selectedDate && (
-                <button 
-                  onClick={() => setSelectedDate(null)}
-                  className="w-full mt-4 text-sm text-primary hover:underline font-medium"
-                >
-                  Show all dates
-                </button>
-              )}
-            </div>
-
-            {/* Filter by Type */}
-            <div className="p-6 rounded-3xl bg-card border border-border shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <Filter className="w-4 h-4 text-muted-foreground" />
-                <h3 className="font-display font-semibold text-foreground">Session Type</h3>
-              </div>
-              <div className="space-y-2">
-                {sessionTypes.map((type) => (
-                  <motion.button
-                    key={type.id}
-                    onClick={() => setSelectedType(type.id)}
-                    whileHover={{ x: 4 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
-                      selectedType === type.id
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                    )}
-                  >
-                    <type.icon className="w-4 h-4" />
-                    {type.label}
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="p-6 rounded-3xl gradient-primary text-primary-foreground shadow-glow">
-              <h3 className="font-display font-semibold mb-4">This Week</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-primary-foreground/80">Total Sessions</span>
-                  <span className="text-2xl font-display font-bold">24</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-primary-foreground/80">Available Spots</span>
-                  <span className="text-2xl font-display font-bold">156</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-primary-foreground/80">Peer Tutors</span>
-                  <span className="text-2xl font-display font-bold">18</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Sessions List */}
-          <div className="lg:col-span-2">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Stats Cards */}
             <motion.div 
-              className="flex items-center justify-between mb-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <h2 className="font-display font-semibold text-xl text-foreground">
-                {selectedDate ? `January ${selectedDate}` : "All Upcoming"} Sessions
-              </h2>
-              <span className="text-sm text-muted-foreground px-3 py-1 rounded-full bg-secondary">
-                {filteredSessions.length} session{filteredSessions.length !== 1 ? 's' : ''}
-              </span>
-            </motion.div>
-
-            <motion.div 
-              className="space-y-4"
+              className="grid grid-cols-2 md:grid-cols-4 gap-4"
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
             >
-              {filteredSessions.map((session) => (
+              {[
+                { icon: Trophy, value: `Level ${user.level}`, label: "Current Level", color: "from-primary to-primary/70" },
+                { icon: Flame, value: `${user.streak} days`, label: "Current Streak", color: "from-accent to-accent/70" },
+                { icon: CheckCircle2, value: user.completedLessons, label: "Lessons Done", color: "from-success to-success/70" },
+                { icon: Clock, value: `${user.hoursLearned}h`, label: "Hours Learned", color: "from-warning to-warning/70" },
+              ].map((stat, index) => (
                 <motion.div 
-                  key={session.id}
+                  key={stat.label}
                   variants={fadeInUp}
-                  className="p-6 rounded-3xl bg-card border border-border hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                  className="p-5 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all hover:-translate-y-1 hover:shadow-lg"
                 >
-                  <div className="flex flex-col md:flex-row md:items-start gap-4">
-                    {/* Icon */}
-                    <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shrink-0 shadow-glow">
-                      <session.icon className="w-7 h-7 text-primary-foreground" />
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className={cn(
-                          "px-3 py-1 rounded-full text-xs font-semibold",
-                          session.level === 'Beginner' ? 'bg-success/10 text-success' :
-                          session.level === 'Intermediate' ? 'bg-warning/10 text-warning' :
-                          'bg-accent/10 text-accent'
-                        )}>
-                          {session.level}
-                        </span>
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground capitalize">
-                          {session.type}
-                        </span>
-                      </div>
-
-                      <h3 className="text-xl font-semibold text-foreground mb-2">
-                        {session.title}
-                      </h3>
-                      <p className="text-muted-foreground mb-4">
-                        {session.description}
-                      </p>
-
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1.5">
-                          <Users className="w-4 h-4" />
-                          {session.tutor}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <Clock className="w-4 h-4" />
-                          {session.time}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <Video className="w-4 h-4" />
-                          {session.spots}/{session.totalSpots} spots
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Action */}
-                    <div className="flex flex-col items-end gap-2 shrink-0">
-                      <Button 
-                        variant="default" 
-                        className="shadow-md"
-                        onClick={() => handleJoinSession(session)}
-                        aria-label={`Join ${session.title} session`}
-                      >
-                        Join Session
-                      </Button>
-                      <span className="text-xs text-muted-foreground">
-                        {session.spots} spots left
-                      </span>
-                    </div>
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-3`}>
+                    <stat.icon className="w-5 h-5 text-primary-foreground" />
                   </div>
+                  <div className="text-2xl font-display font-bold text-foreground">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
                 </motion.div>
               ))}
+            </motion.div>
 
-              {filteredSessions.length === 0 && (
-                <motion.div 
-                  className="text-center py-16"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center mx-auto mb-4">
-                    <CalendarIcon className="w-8 h-8 text-muted-foreground" />
+            {/* XP Progress */}
+            <motion.div 
+              className="p-6 rounded-3xl bg-card border border-border shadow-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
+                    <Zap className="w-6 h-6 text-primary-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">No sessions found</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Try adjusting your filters or selecting a different date.
-                  </p>
-                  <Button variant="outline" onClick={() => { setSelectedType("all"); setSelectedDate(null); }}>
-                    Clear Filters
-                  </Button>
-                </motion.div>
-              )}
+                  <div>
+                    <h3 className="font-display font-semibold text-foreground text-lg">Level Progress</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {user.xpToNext - user.xp} XP to Level {user.level + 1}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-3xl font-display font-bold text-primary">{user.xp}</span>
+                  <span className="text-muted-foreground"> / {user.xpToNext} XP</span>
+                </div>
+              </div>
+              <div className="h-4 bg-secondary rounded-full overflow-hidden">
+                <motion.div 
+                  className="h-full gradient-primary rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercentage}%` }}
+                  transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
+                />
+              </div>
+            </motion.div>
+
+            {/* Weekly Activity Chart */}
+            <motion.div 
+              className="p-6 rounded-3xl bg-card border border-border shadow-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-display font-semibold text-foreground text-lg">Weekly Activity</h3>
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full gradient-primary"></span>
+                    Hours
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-end justify-between gap-3 h-36">
+                {weeklyProgress.map((day, index) => (
+                  <motion.div 
+                    key={day.day} 
+                    className="flex-1 flex flex-col items-center gap-2"
+                    initial={{ scaleY: 0 }}
+                    animate={{ scaleY: 1 }}
+                    transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                    style={{ transformOrigin: "bottom" }}
+                  >
+                    <div 
+                      className="w-full rounded-xl gradient-primary transition-all hover:opacity-80 cursor-pointer"
+                      style={{ height: `${(day.hours / maxHours) * 100}%`, minHeight: day.hours > 0 ? '12px' : '0' }}
+                    />
+                    <span className="text-xs text-muted-foreground font-medium">{day.day}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Recommended Resources */}
+            <motion.div 
+              className="p-6 rounded-3xl bg-card border border-border shadow-sm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-display font-semibold text-foreground text-lg">Continue Learning</h3>
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/resources">
+                    View All
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {recommendedResources.map((resource, index) => (
+                  <motion.div 
+                    key={resource.title}
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer group"
+                    whileHover={{ x: 4 }}
+                  >
+                    <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shrink-0 group-hover:shadow-glow transition-shadow">
+                      <resource.icon className="w-6 h-6 text-primary-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-foreground truncate">{resource.title}</h4>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>{resource.type}</span>
+                        <span>•</span>
+                        <span>{resource.duration}</span>
+                      </div>
+                    </div>
+                    {resource.progress > 0 ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-success rounded-full"
+                            style={{ width: `${resource.progress}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium text-success">{resource.progress}%</span>
+                      </div>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        variant="secondary"
+                        onClick={() => handleStartResource(resource.title)}
+                        aria-label={`Start ${resource.title}`}
+                      >
+                        <Play className="w-3 h-3" />
+                        Start
+                      </Button>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
           </div>
+
+          {/* Sidebar */}
+          <motion.div 
+            className="space-y-6"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            {/* Upcoming Sessions */}
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-display font-semibold text-foreground">Upcoming Sessions</h3>
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/schedule">
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {upcomingSessions.map((session) => (
+                  <button 
+                    key={session.title}
+                    className="w-full p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-colors text-left"
+                    onClick={() => handleJoinSession(session)}
+                    aria-label={`Join ${session.title} session`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <session.icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-medium text-foreground text-sm">{session.title}</h4>
+                        <p className="text-xs text-muted-foreground mb-2">{session.tutor}</p>
+                        <span className="text-xs font-medium text-primary">{session.time}</span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <Button asChild className="w-full mt-4" variant="outline">
+                <Link to="/schedule">Browse More Sessions</Link>
+              </Button>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-sm">
+              <h3 className="font-display font-semibold text-foreground mb-4">Recent Activity</h3>
+              <div className="space-y-4">
+                {recentActivities.map((activity, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                      activity.type === 'lesson' ? 'bg-success/10' :
+                      activity.type === 'quiz' ? 'bg-warning/10' : 'bg-primary/10'
+                    )}>
+                      <activity.icon className={cn(
+                        "w-5 h-5",
+                        activity.type === 'lesson' ? 'text-success' :
+                        activity.type === 'quiz' ? 'text-warning' : 'text-primary'
+                      )} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-foreground font-medium">{activity.title}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{activity.time}</span>
+                        <span className="text-success font-medium">+{activity.xp} XP</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Badges */}
+            <div className="p-6 rounded-3xl bg-card border border-border shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-display font-semibold text-foreground">Badges</h3>
+                <span className="text-sm text-muted-foreground font-medium">{badges.filter(b => b.earned).length}/{badges.length}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {badges.map((badge) => (
+                  <motion.div 
+                    key={badge.name}
+                    whileHover={{ scale: badge.earned ? 1.1 : 1 }}
+                    className={cn(
+                      "aspect-square rounded-2xl flex flex-col items-center justify-center p-2 transition-all cursor-pointer",
+                      badge.earned 
+                        ? "bg-primary/10 hover:bg-primary/20 hover:shadow-md" 
+                        : "bg-secondary/50 opacity-50"
+                    )}
+                  >
+                    <span className="text-2xl mb-1">{badge.icon}</span>
+                    <span className="text-[10px] text-center text-muted-foreground leading-tight font-medium">
+                      {badge.name}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Motivation Card */}
+            <div className="p-6 rounded-3xl gradient-accent text-accent-foreground shadow-accent-glow">
+              <div className="text-4xl mb-3">💪</div>
+              <h3 className="font-display font-semibold text-lg mb-2">Keep Going!</h3>
+              <p className="text-sm text-accent-foreground/80">
+                You're in the top 15% of learners this week. Just 2 more lessons to level up!
+              </p>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>
