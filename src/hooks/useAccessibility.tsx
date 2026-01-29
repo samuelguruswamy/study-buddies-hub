@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AccessibilitySettings {
   colorblindMode: boolean;
@@ -48,8 +49,88 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     return { ...defaultSettings, darkMode: prefersDark };
   });
+  
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Apply all settings to document
+  // Sync settings to database when user is logged in
+  const syncSettingsToDb = useCallback(async (newSettings: AccessibilitySettings, uid: string) => {
+    try {
+      await supabase
+        .from("user_settings")
+        .update({
+          dark_mode: newSettings.darkMode,
+          colorblind_mode: newSettings.colorblindMode,
+          high_contrast: newSettings.highContrast,
+          large_text: newSettings.largeText,
+          reduced_motion: newSettings.reducedMotion,
+          keyboard_focus: newSettings.keyboardFocus,
+        })
+        .eq("user_id", uid);
+    } catch (error) {
+      console.error("Error syncing settings to database:", error);
+    }
+  }, []);
+
+  // Load settings from database when user logs in
+  const loadSettingsFromDb = useCallback(async (uid: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("user_settings")
+        .select("*")
+        .eq("user_id", uid)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error loading settings:", error);
+        return;
+      }
+
+      if (data) {
+        const dbSettings: AccessibilitySettings = {
+          darkMode: data.dark_mode ?? false,
+          colorblindMode: data.colorblind_mode ?? false,
+          highContrast: data.high_contrast ?? false,
+          largeText: data.large_text ?? false,
+          reducedMotion: data.reduced_motion ?? false,
+          keyboardFocus: data.keyboard_focus ?? true,
+        };
+        setSettings(dbSettings);
+        localStorage.setItem("accessibility-settings", JSON.stringify(dbSettings));
+      }
+    } catch (error) {
+      console.error("Error loading settings from database:", error);
+    }
+  }, []);
+
+  // Listen for auth changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        const uid = session?.user?.id ?? null;
+        setUserId(uid);
+
+        if (uid && event === "SIGNED_IN") {
+          // Small delay to ensure the trigger has created the settings row
+          setTimeout(() => loadSettingsFromDb(uid), 200);
+        }
+      }
+    );
+
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const uid = session?.user?.id ?? null;
+      setUserId(uid);
+      if (uid) {
+        loadSettingsFromDb(uid);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [loadSettingsFromDb]);
+
+  // Apply all settings to document and sync
   useEffect(() => {
     localStorage.setItem("accessibility-settings", JSON.stringify(settings));
     
@@ -72,7 +153,12 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     
     // Enhanced keyboard focus
     root.classList.toggle("keyboard-focus", settings.keyboardFocus);
-  }, [settings]);
+
+    // Sync to database if user is logged in
+    if (userId) {
+      syncSettingsToDb(settings, userId);
+    }
+  }, [settings, userId, syncSettingsToDb]);
 
   // Detect system preference for reduced motion on mount
   useEffect(() => {

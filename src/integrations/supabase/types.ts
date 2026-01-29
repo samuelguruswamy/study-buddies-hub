@@ -14,7 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          grade_level: string | null
+          id: string
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          grade_level?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          grade_level?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          id: string
+          progress_percent: number | null
+          resource_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          progress_percent?: number | null
+          resource_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          id?: string
+          progress_percent?: number | null
+          resource_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          colorblind_mode: boolean | null
+          created_at: string
+          dark_mode: boolean | null
+          high_contrast: boolean | null
+          id: string
+          keyboard_focus: boolean | null
+          large_text: boolean | null
+          reduced_motion: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          colorblind_mode?: boolean | null
+          created_at?: string
+          dark_mode?: boolean | null
+          high_contrast?: boolean | null
+          id?: string
+          keyboard_focus?: boolean | null
+          large_text?: boolean | null
+          reduced_motion?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          colorblind_mode?: boolean | null
+          created_at?: string
+          dark_mode?: boolean | null
+          high_contrast?: boolean | null
+          id?: string
+          keyboard_focus?: boolean | null
+          large_text?: boolean | null
+          reduced_motion?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

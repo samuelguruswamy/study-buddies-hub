@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAccessibility } from "@/hooks/useAccessibility";
+import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Menu, 
@@ -14,9 +15,20 @@ import {
   Users,
   Sparkles,
   Sun,
-  Moon
+  Moon,
+  LogIn,
+  LogOut,
+  User as UserIcon,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navItems = [
   { name: "Home", path: "/", icon: Home },
@@ -32,15 +44,29 @@ export function Navigation() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { settings, toggleDarkMode } = useAccessibility();
+  const { user, profile, loading, signOut } = useAuth();
 
   const handleGetStarted = () => {
-    toast({
-      title: "Welcome! 🎉",
-      description: "Let's get you started on your learning journey!",
-    });
-    navigate("/dashboard");
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/signup");
+    }
     setIsOpen(false);
   };
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Signed out",
+      description: "You've been signed out successfully.",
+    });
+    navigate("/");
+    setIsOpen(false);
+  };
+
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || "User";
+  const avatarInitial = displayName.charAt(0).toUpperCase();
 
   return (
     <motion.nav 
@@ -132,16 +158,63 @@ export function Navigation() {
               </AnimatePresence>
             </motion.button>
 
-            {/* CTA Button */}
-            <Button 
-              variant="accent" 
-              size="sm" 
-              className="shadow-md"
-              onClick={handleGetStarted}
-              aria-label="Get started with learning"
-            >
-              Get Started
-            </Button>
+            {/* Auth Section */}
+            {loading ? (
+              <div className="p-2.5">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button 
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary hover:bg-secondary/80 transition-colors"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
+                      {avatarInitial}
+                    </div>
+                    <span className="text-sm font-medium text-foreground max-w-[100px] truncate">
+                      {displayName}
+                    </span>
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/login">
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </Link>
+                </Button>
+                <Button 
+                  variant="accent" 
+                  size="sm" 
+                  className="shadow-md"
+                  onClick={handleGetStarted}
+                  aria-label="Get started with learning"
+                >
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -204,6 +277,19 @@ export function Navigation() {
             transition={{ duration: 0.3 }}
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-2">
+              {/* User info for mobile */}
+              {user && (
+                <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl bg-secondary/50">
+                  <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-semibold">
+                    {avatarInitial}
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">{displayName}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                </div>
+              )}
+
               {navItems.map((item, index) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -229,18 +315,39 @@ export function Navigation() {
                   </motion.div>
                 );
               })}
+
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: navItems.length * 0.05 }}
+                className="mt-2 space-y-2"
               >
-                <Button 
-                  variant="accent" 
-                  className="w-full mt-2"
-                  onClick={handleGetStarted}
-                >
-                  Get Started
-                </Button>
+                {user ? (
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </Button>
+                ) : (
+                  <>
+                    <Button asChild variant="outline" className="w-full">
+                      <Link to="/login" onClick={() => setIsOpen(false)}>
+                        <LogIn className="w-4 h-4" />
+                        Sign In
+                      </Link>
+                    </Button>
+                    <Button 
+                      variant="accent" 
+                      className="w-full"
+                      onClick={handleGetStarted}
+                    >
+                      Get Started
+                    </Button>
+                  </>
+                )}
               </motion.div>
             </div>
           </motion.div>
