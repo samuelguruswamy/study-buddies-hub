@@ -87,7 +87,7 @@ export function Navigation() {
               <Sparkles className="w-5 h-5 text-primary-foreground" />
             </motion.div>
             <span className="font-display font-bold text-xl text-foreground">
-              Design<span className="text-primary">2</span>Learn
+              Neo<span className="text-primary">2</span>Socratic
             </span>
           </Link>
 

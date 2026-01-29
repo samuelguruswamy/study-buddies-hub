@@ -69,7 +69,7 @@ export function SignupPage() {
 
     toast({
       title: "Account created! 🎉",
-      description: "Welcome to Design2Learn! Let's start your journey.",
+      description: "Welcome to NeoSocratic! Let's start your journey.",
     });
     
     navigate("/dashboard");

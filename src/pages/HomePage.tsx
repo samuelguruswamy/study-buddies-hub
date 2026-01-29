@@ -75,7 +75,7 @@ const stats = [
 
 const testimonials = [
   {
-    quote: "Design2Learn helped me finally understand recursion. My peer tutor explained it way better than any lecture!",
+    quote: "NeoSocratic helped me finally understand recursion. My peer tutor explained it way better than any lecture!",
     name: "Maya K.",
     role: "Computer Science Major",
     avatar: "M",

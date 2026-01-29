@@ -34,7 +34,7 @@ export function Footer() {
                 <Sparkles className="w-5 h-5 text-primary-foreground" />
               </div>
               <span className="font-display font-bold text-lg">
-                Design<span className="text-primary">2</span>Learn
+                Neo<span className="text-primary">2</span>Socratic
               </span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mb-6">
@@ -76,7 +76,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2024 Design2Learn. All rights reserved.
+            © 2024 NeoSocratic. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground flex items-center gap-1">
             Made with <Heart className="w-4 h-4 text-accent fill-accent" /> by students everywhere
